@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Etiquetas Moderno</title>
+  <style>
+    :root {
+      --primary-color: #007bff;
+      --primary-hover-color: #0056b3;
+      --secondary-color: #6c757d;
+      --secondary-hover-color: #5a6268;
+      --background-color: #f8f9fa;
+      --card-background-color: #ffffff;
+      --text-color: #343a40;
+      --border-color: #dee2e6;
+      --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      --success-color: #28a745;
+      --error-color: #dc3545;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container { max-width: 800px; margin: 20px auto; padding: 20px; }
+    h1, h2, h3 { color: var(--primary-color); }
+    h1 { text-align: center; margin-bottom: 30px; }
+
+    .card {
+      background-color: var(--card-background-color);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 25px;
+      margin-bottom: 25px;
+      border: 1px solid var(--border-color);
+    }
+    
+    .fornecedor-card {
+        background-color: #fdfdfd;
+        border-left: 4px solid var(--primary-color);
+        margin-top: 20px;
+        padding: 20px;
+        position: relative;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; }
+
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      box-sizing: border-box;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); }
+    input.valid { border-color: var(--success-color) !important; }
+    input.invalid { border-color: var(--error-color) !important; }
+
+    .checkbox-group {
+        display: flex; align-items: center; padding: 10px;
+        background-color: #e9f4ff; border-radius: 4px; margin-bottom: 20px;
+    }
+    input[type="checkbox"] { margin-right: 10px; transform: scale(1.2); }
+
+    .button-group { text-align: center; margin-top: 20px; }
+    button {
+      padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer;
+      font-size: 1em; font-weight: 600; transition: background-color 0.2s, transform 0.1s, opacity 0.2s;
+    }
+    button:hover { transform: translateY(-2px); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-primary { background-color: var(--primary-color); color: white; }
+    .btn-primary:hover:not(:disabled) { background-color: var(--primary-hover-color); }
+    
+    .btn-secondary { background-color: var(--secondary-color); color: white; }
+    .btn-secondary:hover { background-color: var(--secondary-hover-color); }
+    
+    #fornecedores1 { margin-top: 20px; min-height: 60px; }
+
+    /* Print Styles - Grid Estável */
+    @media print {
+      @page { size: A4; margin: 12mm; }
+      body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+      .container, .card, .button-group, .checkbox-group, h1, h2, .no-print { display: none !important; }
+      
+      .pagina-impressao { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12mm; width: 100%; }
+      .etiqueta-container { page-break-inside: avoid; width: 100%; }
+      .relatorio-container { grid-column: 1 / -1; margin-bottom: 15mm; }
+      
+      .etiqueta { 
+        border: 1px solid #000 !important; border-left: 4px solid #000 !important; 
+        padding: 12px; box-shadow: none !important; font-size: 10.5pt; line-height: 1.4; color: #000 !important; 
+      }
+      .etiqueta h3 { 
+        color: #000 !important; border-bottom: 1px solid #999 !important; 
+        padding-bottom: 4px; margin: 0 0 8px 0; font-size: 11pt; 
+      }
+      .etiqueta strong { color: #000 !important; }
+      .btn-print { display: inline-block; margin-bottom: 10mm; padding: 10px 20px; border: 1px solid #000; background: #fff; cursor: pointer; font-weight: bold; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Gerador de Etiquetas de Fiscalização</h1>
+
+    <div class="card" id="os-section">
+      <h2>Informações da Ordem de Serviço</h2>
+      
+      <div class="checkbox-group">
+          <input type="checkbox" id="gerar1" name="gerar1">
+          <label for="gerar1" style="margin-bottom: 0;">Confirmar Geração de Etiqueta</label>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="numero1">Ordem de Serviço nº:</label>
+          <input type="text" id="numero1" name="numero1" required placeholder="Ex: 2025/001">
+        </div>
+        <div class="form-group">
+          <label for="consumidor1">Consumidor:</label>
+          <input type="text" id="consumidor1" name="consumidor1" placeholder="Nome do consumidor">
+        </div>
+        <div class="form-group">
+          <label for="dataRealizacao1">Período de Realização:</label>
+          <input type="text" id="dataRealizacao1" name="dataRealizacao1" placeholder="Ex: 01/10/2025 a 05/10/2025">
+        </div>
+        <div class="form-group">
+          <label for="quantEstabelecimentos1">Qtd. Estabelecimentos Fiscalizados:</label>
+          <input type="number" id="quantEstabelecimentos1" name="quantEstabelecimentos1" min="0" value="0">
+        </div>
+        <div class="form-group">
+          <label for="quantRelatorios1">Qtd. Relatórios de Visitas:</label>
+          <input type="number" id="quantRelatorios1" name="quantRelatorios1" min="0" value="0">
+        </div>
+        <div class="form-group">
+          <label for="quantAutosConstatacao1">Qtd. Autos de Constatação:</label>
+          <input type="number" id="quantAutosConstatacao1" name="quantAutosConstatacao1" min="0" value="0">
+        </div>
+        <div class="form-group">
+          <label for="quantAutosInfracao1">Qtd. Autos de Infração:</label>
+          <input type="number" id="quantAutosInfracao1" name="quantAutosInfracao1" min="0" value="0">
+        </div>
+        <div class="form-group">
+          <label for="quantAutosApreensao1">Qtd. Autos de Apreensão:</label>
+          <input type="number" id="quantAutosApreensao1" name="quantAutosApreensao1" min="0" value="0">
+        </div>
+        <div class="form-group">
+          <label for="quantFolhasContinuacao1">Qtd. Folhas de Continuação:</label>
+          <input type="number" id="quantFolhasContinuacao1" name="quantFolhasContinuacao1" min="0" value="0">
+        </div>
+      </div>
+    </div>
+    
+    <div class="card" id="fornecedores-section">
+        <h2>Fornecedores Fiscalizados</h2>
+        <div id="fornecedores1">
+            <p style="text-align: center; color: #6c757d; padding: 20px;">Nenhum fornecedor adicionado ainda.</p>
+        </div>
+        <div class="button-group">
+          <button type="button" onclick="adicionarFornecedor()" class="btn-secondary">+ Adicionar Fornecedor</button>
+        </div>
+    </div>
+
+    <div class="button-group">
+      <button type="button" id="btn-gerar" onclick="gerarEtiquetas()" class="btn-primary" disabled>Gerar Todas as Etiquetas</button>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // UTILITÁRIOS & ESTADO CENTRALIZADO
+    // ==========================================
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => document.querySelectorAll(sel);
+
+    // Escapa HTML para prevenir XSS
+    const esc = (str) => String(str ?? '').replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+
+    // Estado da aplicação
+    let osData = {};
+    let fornecedoresData = [];
+    let idCounter = 0;
+
+    // Máscara e Validação CNPJ
+    const maskCNPJ = (v) => v.replace(/\D/g, '').replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+    const isValidCNPJ = (v) => /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(v);
+
+    // ==========================================
+    // SINCRONIZAÇÃO DE DADOS (OS)
+    // ==========================================
+    function syncOSData() {
+        ['numero1','consumidor1','dataRealizacao1','quantEstabelecimentos1','quantRelatorios1',
+         'quantAutosConstatacao1','quantAutosInfracao1','quantAutosApreensao1','quantFolhasContinuacao1'].forEach(id => {
+            osData[id] = $(`#${id}`).value;
+        });
+    }
+
+    $$('.form-group input').forEach(input => input.addEventListener('input', syncOSData));
+
+    // ==========================================
+    // GERENCIAMENTO DE FORNECEDORES
+    // ==========================================
+    function adicionarFornecedor() {
+        fornecedoresData.push({
+            id: ++idCounter, nome:'', cnpj:'', cidadeUf:'',
+            autoConstatacao:'', autoInfracao:'', autoApreensao:'', folhaContinuacao:''
+        });
+        renderFornecedores();
+    }
+
+    function removerFornecedor(id) {
+        fornecedoresData = fornecedoresData.filter(f => f.id !== id);
+        renderFornecedores();
+    }
+
+    function atualizarFornecedor(id, campo, valor) {
+        const f = fornecedoresData.find(x => x.id === id);
+        if (f) f[campo] = valor;
+    }
+
+    function gerarCamposHTML(f) {
+        const campos = [
+            {id:'nome', label:'Nome:', placeholder:'Nome do Fornecedor'},
+            {id:'cnpj', label:'CNPJ:', placeholder:'00.000.000/0000-00'},
+            {id:'cidadeUf', label:'Cidade/UF:', placeholder:'Ex: Guaraí/TO'},
+            {id:'autoConstatacao', label:'Auto de Constatação nº:'},
+            {id:'autoInfracao', label:'Auto de Infração nº:'},
+            {id:'autoApreensao', label:'Auto de Apreensão nº:'},
+            {id:'folhaContinuacao', label:'Folha(s) de continuação do(s) dia(s):'}
+        ];
+        return campos.map(c => `
+            <div class="form-group">
+                <label>${esc(c.label)}</label>
+                <input type="text" id="f_${f.id}_${c.id}" data-id="${f.id}" data-campo="${c.id}" 
+                       value="${esc(f[c.id])}" placeholder="${c.placeholder || ''}">
+            </div>
+        `).join('');
+    }
+
+    function renderFornecedores() {
+        const container = $('#fornecedores1');
+        if (fornecedoresData.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:#6c757d;padding:20px;">Nenhum fornecedor adicionado ainda.</p>';
+            return;
+        }
+        container.innerHTML = fornecedoresData.map((f, i) => `
+            <div class="card fornecedor-card">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                    <h3>Fornecedor ${String(i+1).padStart(2,'0')}</h3>
+                    <button type="button" onclick="removerFornecedor(${f.id})" class="btn-secondary" style="padding:6px 12px;font-size:0.85em;">✕ Remover</button>
+                </div>
+                <div class="form-grid">
+                    ${gerarCamposHTML(f)}
+                </div>
+            </div>
+        `).join('');
+
+        // Event Delegation para inputs dinâmicos
+        container.addEventListener('input', (e) => {
+            if (!e.target.matches('input[data-campo]')) return;
+            const {id, campo} = e.target.dataset;
+            atualizarFornecedor(Number(id), campo, e.target.value);
+            if (campo === 'cnpj') {
+                e.target.value = maskCNPJ(e.target.value);
+                atualizarFornecedor(Number(id), campo, e.target.value);
+            }
+        });
+
+        container.addEventListener('blur', (e) => {
+            if (!e.target.matches('input[data-campo="cnpj"]')) return;
+            e.target.classList.toggle('valid', isValidCNPJ(e.target.value));
+            e.target.classList.toggle('invalid', !isValidCNPJ(e.target.value) && e.target.value.length > 0);
+        }, true);
+    }
+
+    // ==========================================
+    // CONTROLE DO BOTÃO & GERAÇÃO
+    // ==========================================
+    $('#gerar1').addEventListener('change', (e) => {
+        $('#btn-gerar').disabled = !e.target.checked;
+    });
+
+    function gerarEtiquetas() {
+        syncOSData();
+
+        // Validação básica
+        if (!osData.numero1.trim()) return alert('Preencha a Ordem de Serviço nº.');
+        
+        // Coleta robusta dos fornecedores (usa o estado, não o DOM)
+        const fornecedores = fornecedoresData.filter(f => f.nome.trim());
+        
+        const todosAutosConstatacao = fornecedores.map(f => esc(f.autoConstatacao)).filter(Boolean).join(', ');
+        const todosAutosInfracao = fornecedores.map(f => esc(f.autoInfracao)).filter(Boolean).join(', ');
+        const todosAutosApreensao = fornecedores.map(f => esc(f.autoApreensao)).filter(Boolean).join(', ');
+        const todasFolhasContinuacao = fornecedores.map(f => esc(f.folhaContinuacao)).filter(Boolean).join('; ');
+
+        // Construção segura do HTML do Relatório
+        let htmlRelatorio = `<div class="etiqueta-container relatorio-container"><div class="etiqueta etiqueta-relatorio"><h3>RELATÓRIO GERAL</h3>`;
+        if (osData.numero1) htmlRelatorio += `<strong>Ordem de Serviço nº:</strong> ${esc(osData.numero1)}<br>`;
+        if (osData.consumidor1) htmlRelatorio += `<strong>Consumidor:</strong> ${esc(osData.consumidor1)}<br>`;
+        if (osData.dataRealizacao1) htmlRelatorio += `<strong>Período:</strong> ${esc(osData.dataRealizacao1)}<br>`;
+        htmlRelatorio += `<br>`;
+        
+        if (parseInt(osData.quantEstabelecimentos1) > 0) htmlRelatorio += `<strong>Estabelecimentos Fiscalizados:</strong> ${esc(osData.quantEstabelecimentos1)}<br>`;
+        if (parseInt(osData.quantRelatorios1) > 0) htmlRelatorio += `<strong>Relatórios de Visitas:</strong> ${esc(osData.quantRelatorios1)}<br>`;
+        if (parseInt(osData.quantAutosConstatacao1) > 0) htmlRelatorio += `<strong>Qtd. Autos de Constatação:</strong> ${esc(osData.quantAutosConstatacao1)}<br>`;
+        if (parseInt(osData.quantAutosInfracao1) > 0) htmlRelatorio += `<strong>Qtd. Autos de Infração:</strong> ${esc(osData.quantAutosInfracao1)}<br>`;
+        if (parseInt(osData.quantAutosApreensao1) > 0) htmlRelatorio += `<strong>Qtd. Autos de Apreensão:</strong> ${esc(osData.quantAutosApreensao1)}<br>`;
+        if (parseInt(osData.quantFolhasContinuacao1) > 0) htmlRelatorio += `<strong>Qtd. Folhas de Continuação:</strong> ${esc(osData.quantFolhasContinuacao1)}<br>`;
+        
+        if (todosAutosConstatacao) htmlRelatorio += `<br><strong>Auto(s) de Constatação nº:</strong> ${todosAutosConstatacao}<br>`;
+        if (todosAutosInfracao) htmlRelatorio += `<strong>Auto(s) de Infração nº:</strong> ${todosAutosInfracao}<br>`;
+        if (todosAutosApreensao) htmlRelatorio += `<strong>Auto(s) de Apreensão nº:</strong> ${todosAutosApreensao}<br>`;
+        if (todasFolhasContinuacao) htmlRelatorio += `<strong>Folhas de continuação dos dias:</strong> ${todasFolhasContinuacao}<br>`;
+
+        const listaFornecedoresCnpj = fornecedores.map(f => `${esc(f.nome)} (${esc(f.cnpj) || 'N/A'})`).join('; ');
+        if (listaFornecedoresCnpj) htmlRelatorio += `<br><strong>Fornecedores Fiscalizados:</strong> ${listaFornecedoresCnpj}<br>`;
+        htmlRelatorio += `</div></div>`;
+
+        // Construção segura das Etiquetas Individuais
+        let htmlFornecedores = fornecedores.map(f => `
+            <div class="etiqueta-container fornecedor-container"><div class="etiqueta">
+                <h3>${esc(f.nome.toUpperCase())}</h3>
+                ${osData.numero1 ? `<strong>Ordem de Serviço nº:</strong> ${esc(osData.numero1)}<br>` : ''}
+                ${f.cnpj ? `<strong>CNPJ:</strong> ${esc(f.cnpj)}<br>` : ''}
+                ${f.cidadeUf ? `<strong>Cidade/UF:</strong> ${esc(f.cidadeUf)}<br>` : ''}
+                ${f.autoConstatacao ? `<strong>Auto de Constatação nº:</strong> ${esc(f.autoConstatacao)}<br>` : ''}
+                ${f.autoInfracao ? `<strong>Auto de Infração nº:</strong> ${esc(f.autoInfracao)}<br>` : ''}
+                ${f.autoApreensao ? `<strong>Auto de Apreensão nº:</strong> ${esc(f.autoApreensao)}<br>` : ''}
+                ${f.folhaContinuacao ? `<strong>Folha(s) de continuação:</strong> ${esc(f.folhaContinuacao)}<br>` : ''}
+            </div></div>
+        `).join('');
+
+        // Abre janela de impressão com CSS otimizado
+        const novaJanela = window.open('', '_blank');
+        novaJanela.document.write(`
+            <!DOCTYPE html>
+            <html lang="pt-br">
+            <head>
+                <meta charset="UTF-8">
+                <title>Etiquetas para Impressão</title>
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+                    * { box-sizing: border-box; }
+                    body { font-family: 'Inter', sans-serif; margin: 0; padding: 15mm; background: #f4f4f4; color: #222; }
+                    .pagina-impressao { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12mm; max-width: 100%; margin: 0 auto; }
+                    .etiqueta-container { page-break-inside: avoid; background: #fff; }
+                    .relatorio-container { grid-column: 1 / -1; margin-bottom: 15mm; }
+                    .etiqueta { border: 1px solid #ccc; border-left: 5px solid #007bff; padding: 16px; font-size: 11pt; line-height: 1.5; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+                    .etiqueta h3 { margin: 0 0 8px 0; color: #007bff; border-bottom: 2px solid #eee; padding-bottom: 6px; font-size: 13pt; }
+                    .etiqueta strong { color: #111; }
+                    .btn-print { display: block; margin: 20px auto; padding: 12px 30px; background: #007bff; color: #fff; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; font-weight: 600; }
+                    .btn-print:hover { background: #0056b3; }
+                    
+                    @media print {
+                        @page { size: A4; margin: 12mm; }
+                        body { background: #fff !important; padding: 0 !important; }
+                        .pagina-impressao { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12mm; }
+                        .etiqueta { border: 1px solid #000 !important; border-left: 4px solid #000 !important; box-shadow: none !important; padding: 12px; }
+                        .etiqueta h3 { color: #000 !important; border-bottom: 1px solid #999 !important; }
+                        .btn-print { display: none !important; }
+                    }
+                </style>
+            </head>
+            <body>
+                <button class="btn-print no-print" onclick="window.print()">🖨️ Imprimir Etiquetas</button>
+                ${htmlRelatorio}
+                <div class="pagina-impressao">
+                    ${htmlFornecedores}
+                </div>
+            </body>
+            </html>
+        `);
+        novaJanela.document.close();
+        novaJanela.focus();
+        
+        // Reset checkbox após geração
+        $('#gerar1').checked = false;
+        $('#btn-gerar').disabled = true;
+    }
+  </script>
+</body>
+</html>
